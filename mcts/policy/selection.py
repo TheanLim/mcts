@@ -7,7 +7,12 @@ def UCB(node:Node,
         rewardIdx:Optional[List[int]]=None,
         breakTies:Callable[[List[Action]],Action]=random.choice
         )->Node:
-  
+  '''
+  Given a parent node, returns a child node according to UCB1 quantity.
+  rewardIdx: Applicable it the rewards are encoded with multiple elements, each representing different agents' reward
+            For example reward =(0,1,1). rewardIdx:=2 means that only reward[rewardIdx] is considered.
+  breakTies: Function used to choose an node from multiple equally good node.
+  '''
   bestUCB, bestActions = float("-inf"), []
   epsilon = 0.00001
   
@@ -16,7 +21,7 @@ def UCB(node:Node,
     if not child.rewards:
         childRewards=0
     else:
-      childRewards = sum([child.rewards[idx] for idx in rewardIdx]) if rewardIdx else child.rewards
+      childRewards = sum([child.rewards[idx] for idx in rewardIdx]) if rewardIdx else sum(child.rewards)
     
     childExpectedReward = childRewards / (child.numVisits+epsilon)
     ucb = childExpectedReward + explorationConstant * math.sqrt(math.log(node.numVisits)/(child.numVisits+epsilon))
