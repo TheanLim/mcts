@@ -54,9 +54,8 @@ def gamePlay( rounds:int,
       raise Exception("Agents and Kwarg Lists have different length.")
 
   rewards = {}
-  if not agentSigns: agentSigns = [str(i) for i in range(numPlayers)]
-  for sign in agentSigns:
-    rewards[sign]=None
+  if not agentSigns: agentSigns = [str(i) for i in range(numPlayers)] # default signs
+  for sign in agentSigns: rewards[sign]=None
 
   for _ in tqdm(range(rounds)):
     state = initialState
