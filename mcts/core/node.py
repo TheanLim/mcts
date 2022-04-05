@@ -1,10 +1,13 @@
 from mcts.core.state import State
 
+'''
+A Prototype of a Node
+'''
 class Node:
   def __init__(self, state:State, parent=None):
     self.state = state
     self.parent = parent
-    self.children = {}
+    self.children = {} # {action:Node(stateAfterAction, self)}
     self.numVisits = 0
     self.rewards = None
   
