@@ -1,9 +1,6 @@
-from mcts import MCTS
-from mcts.core import Search, State, Action
-from mcts.policy import UCB, linearExpansion, randomRollout
-from mcts.utils import sumTuple, Random, gamePlay
+from mcts.core import State, Action
 
-from typing import List, Any, Tuple, Dict, Optional, Any
+from typing import List, Any, Tuple, Any
 from copy import deepcopy
 
 '''
@@ -232,21 +229,3 @@ class MNK(State):
     row is separated (newline) from each other
     '''
     return '\n'.join(map(lambda x: ' '.join(map(str, x)), self.board))
-
-def main():
-  # Create a Tic Tac Toe Game State
-  TTT = MNK(3,3, 3, ["O", "X"])
-  # Initialize Agents: MCTS agent and a Random agent
-  agent1 = Random() # Randomly choose an action
-  agent2 = MCTS(UCB, linearExpansion, randomRollout, sumTuple, simPerIter=100)
-  agents = [agent1, agent2]
-  # Specify kwarg for MCTS agent.search()
-  agentKwargs=[{}, {'maxIteration':25, 'rewardIdx':[1]}]
-
-  winStatistics = gamePlay( rounds=1, initialState=TTT, agentList = agents, 
-                            agentKwargList=agentKwargs, 
-                            rewardSumFunc=sumTuple, printDetails=True)
-  print(winStatistics)
-
-if __name__ == "__main__":
-    main()
