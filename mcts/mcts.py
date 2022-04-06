@@ -16,26 +16,25 @@ class MCTS(Search):
                expansionPolicy:Callable[[State], List[Action]], 
                rollOutPolicy:Callable[[State],Any],  
                rewardSumFunc:Callable[[Any, Any], Any]=sum, 
-               explorationConstant:Union[float, int] = math.sqrt(2), 
-               simPerIter:int=1):
+               explorationConstant:Union[float, int] = math.sqrt(2)
+               ):
     '''
     selectionPolicy: Given the current node, which child node should be selected to traverse to?
     expansionPolicy: Given the current (leaf) node, which child node should be expanded (grown) first?
     rollOutPolicy: Given the current node/state, how should a playout be completed? What's the sequence of action to take?
     rewardSumFunc: function used to sum two rewards. The default is sum()
-    simPerIter: number of simulation(rollouts) from the chosen node.
     '''
     self.explorationConstant = explorationConstant
     self.selectionPolicy = selectionPolicy
     self.expansionPolicy = expansionPolicy # function that returns a seq of actions
     self.rewardSumFunc = rewardSumFunc
     self.rollOutPolicy = rollOutPolicy
-    self.simPerIter = simPerIter
   
   def search(self, 
              state:State, 
-             maxIteration:int=1000,
-             maxTimeSec:int=1000,
+             maxIteration:Callable=(lambda: 1000),
+             maxTimeSec:Callable=(lambda: 1000),
+             simPerIter:Callable=(lambda:1),
              rewardIdx:Optional[List[int]]=None,
              breakTies:Callable[[List[Action]],Action]=random.choice
              )->Action:
@@ -43,17 +42,21 @@ class MCTS(Search):
     Search for the best action to take given a state.
     The search is stopped when the maxIteration or maxTimeSec is hitted. 
     Args:
+      simPerIter: number of simulation(rollouts) from the chosen node.
       rewardIdx: Applicable it the rewards are encoded with multiple elements, each representing different agents' reward
                   For example reward =(0,1,1). rewardIdx:=2 means that only reward[rewardIdx] is considered.
       breakTies: Function used to choose an node from multiple equally good node.
     '''
     self.root = Node(state, None)
+    self.simPerIter = simPerIter()
     self.rewardIdx = rewardIdx
     iterCnt = 0
     now = time.time()
-    timePassed, timeMax = now, now+maxTimeSec
+    timePassed, timeMax = now, now+maxTimeSec()
+    maxIter = maxIteration()
+    #print(maxIter, self.simPerIter)
     # Loop while have remaining iterations or time
-    while iterCnt<maxIteration and timePassed<timeMax:
+    while iterCnt<maxIter and timePassed<timeMax:
       self.oneIteration()
       iterCnt+=1
       timePassed = time.time()

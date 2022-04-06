@@ -1,6 +1,7 @@
 from mcts.core import State, Search, Action
 from typing import Tuple, List, Optional, Dict, Any, Callable
 from tqdm import tqdm
+from copy import deepcopy
 import random
 
 class Random(Search):
@@ -9,6 +10,23 @@ class Random(Search):
   '''
   def search(self, state: State)->Action:
     return random.choice(state.getActions())
+
+class Schedule:
+  '''
+  Returns a schedule of values
+  '''
+  def __init__(self, initialValue, step, maxBound:int=10000, minBound:int=0):
+    self.iteration = 0
+    self.curVal = initialValue
+    self.step = step
+    self.maxBound = maxBound
+    self.minBound = minBound
+  def __call__(self):
+    self.iteration+=1
+    curVal = self.curVal + self.step
+    self.curVal = max(self.minBound, curVal)
+    self.curVal = min(self.maxBound, self.curVal)
+    return self.curVal
 
 def sumTuple(a:Tuple, b:Tuple)->Tuple:
   '''
@@ -48,8 +66,10 @@ def gamePlay( rounds:int,
       raise Exception("Agents and Kwarg Lists have different length.")
 
   rewards = None
+  initialKwargs = deepcopy(agentKwargList)
   for _ in tqdm(range(rounds)):
     state = initialState
+    agentKwargList = deepcopy(initialKwargs)
     if printDetails: print(state)
 
     for i in range(maxIterPerRound):
