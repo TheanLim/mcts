@@ -168,10 +168,10 @@ class MNK(State):
       else:
         runningK = 0
       l+=1
-    if runningK==self.k: 
-      encodeReward()
-      self._isTerminal = True
-      return True
+      if runningK==self.k: 
+        encodeReward()
+        self._isTerminal = True
+        return True
     #### Check col ####
     top, bottom = topMost, bottomMost
     runningK = 0
@@ -181,12 +181,14 @@ class MNK(State):
       else:
         runningK = 0
       top+=1
-    if runningK==self.k: 
-      encodeReward() 
-      self._isTerminal = True
-      return True
+      if runningK==self.k: 
+        encodeReward() 
+        self._isTerminal = True
+        return True
     #### Check Diag1 ####
-    top, bottom, l, r = topMost, bottomMost, leftMost, rightMost
+    minDist = min(lastAction.m-topMost, lastAction.n-leftMost)
+    top, l = lastAction.m-minDist, lastAction.n-minDist
+    bottom, r = bottomMost, rightMost
     runningK = 0
     while top<=bottom and l<=r:
       if self.board[top][l]==lastPlayerSign:
@@ -195,12 +197,15 @@ class MNK(State):
         runningK = 0
       top+=1
       l+=1
-    if runningK==self.k: 
-      encodeReward()
-      self._isTerminal = True
-      return True
+      if runningK==self.k: 
+        encodeReward()
+        self._isTerminal = True
+        return True
     #### Check Diag2 ####
-    top, bottom, l, r = topMost, bottomMost, leftMost, rightMost
+    minDist = min(lastAction.m-topMost, rightMost-lastAction.n)
+    top, r = lastAction.m-minDist, lastAction.n+minDist
+    bottom, l = bottomMost, leftMost
+    runningK = 0
     while top<=bottom and l<=r:
       if self.board[top][r]==lastPlayerSign:
         runningK+=1
@@ -208,10 +213,10 @@ class MNK(State):
         runningK = 0
       top+=1
       r-=1
-    if runningK==self.k: 
-      encodeReward()
-      self._isTerminal = True
-      return True
+      if runningK==self.k: 
+        encodeReward()
+        self._isTerminal = True
+        return True
     return False
   
   def getReward(self)->Tuple:
