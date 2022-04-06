@@ -24,25 +24,19 @@ def sumTuple(a:Tuple, b:Tuple)->Tuple:
 def gamePlay( rounds:int, 
               initialState:State, 
               agentList:List[Search], 
-              agentSigns:Optional[List[Any]]=None,
               agentKwargList:Optional[List[Dict]]=None,
               rewardSumFunc:Callable=sum,
               printDetails:bool=False, 
-              )->Dict[Any, Any]:
+              )->Any:
   '''
   Play/simulate a game for one/multiple rounds
   Args:
     rounds: number of simulation
     initialState: the initial game state. Each round starts with the same initialState
     agentList: list of agents. The agent should have a `search(state)` method (inherits from the class `Search`.)
-    agentSigns: List of agent signs. For example: ["X", "O"] means that the first player is represented as "X". Optional.
-                By default, the agentSigns are "0", "1",...
     agentKwargList: kwargs to be passed to `agent.search()`. Optional.
     rewardSumFunc: function used to sum two rewards.
     printDetails: whether to print the `state` or not.
-  Returns:
-    A dictionary of {agentSign: cumulativeRewards}. 
-      Assume the current reward is applicable to the agent that's taking action only.
   '''
   maxIterPerRound = len(initialState.getActions())
   numPlayers = len(agentList)
@@ -53,10 +47,7 @@ def gamePlay( rounds:int,
     if len(agentList)!=len(agentKwargList):
       raise Exception("Agents and Kwarg Lists have different length.")
 
-  rewards = {}
-  if not agentSigns: agentSigns = [str(i) for i in range(numPlayers)] # default signs
-  for sign in agentSigns: rewards[sign]=None
-
+  rewards = None
   for _ in tqdm(range(rounds)):
     state = initialState
     if printDetails: print(state)
@@ -73,11 +64,7 @@ def gamePlay( rounds:int,
 
       # Sum rewards
       if state.getReward():
-        agentSign = agentSigns[i%numPlayers]
-        if rewards[agentSign]:
-          rewards[agentSign] = rewardSumFunc(rewards[agentSign], state.getReward())
-        else:
-          rewards[agentSign]=state.getReward()
+        rewards = rewardSumFunc(rewards, state.getReward()) if rewards else state.getReward()
       
       if(state.isTerminal()): 
         break
