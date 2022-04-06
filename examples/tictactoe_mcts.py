@@ -6,8 +6,8 @@ def main():
   # Create a Tic Tac Toe Game State
   TTT = MNK(3,3, 3, ["O", "X"])
   # Initialize Agents: MCTS agent and a Random agent
-  agent1 = Random() # Randomly choose an action
-  agent2 = MCTS(UCB, linearExpansion, randomRollout, sumTuple, simPerIter=100)
+  agent1 = Random() # Randomly choose an action. It is "O"
+  agent2 = MCTS(UCB, linearExpansion, randomRollout, sumTuple, simPerIter=100) # It is "X"
   agents = [agent1, agent2]
   # Specify kwarg for MCTS agent.search()
   agentKwargs=[{}, {'maxIteration':25, 'rewardIdx':[1]}]
