@@ -143,14 +143,15 @@ class MNK(State):
     def encodeReward()->None:
       '''
       Encodes reward properly
-      (0,0,1,0) means the third player wins and get reward of 1
+      (-1,-1,1,-1) means the third player wins and get reward of 1
+      and the other lose (-1 reward)
       '''
       reward = []
       for sign in self.playerSigns:
         if sign == self.lastAction.playerSign:
           reward.append(1)
         else:
-          reward.append(0)
+          reward.append(-1)
       self.reward = tuple(reward)
     
     lastAction = self.lastAction
@@ -230,20 +231,20 @@ class MNK(State):
     Prints the 2D board properly so that each
     row is separated (newline) from each other
     '''
-    return '\n'.join(map(str, self.board))
+    return '\n'.join(map(lambda x: ' '.join(map(str, x)), self.board))
 
 def main():
   # Create a Tic Tac Toe Game State
-  TTT = MNK(3,3, 3, ["X", "O"])
+  TTT = MNK(3,3, 3, ["O", "X"])
   # Initialize Agents: MCTS agent and a Random agent
-  agent1 = MCTS(UCB, linearExpansion, randomRollout, sumTuple)
-  agent2 = Random() # Randomly choose an action
+  agent1 = Random() # Randomly choose an action
+  agent2 = MCTS(UCB, linearExpansion, randomRollout, sumTuple, simPerIter=300)
   agents = [agent1, agent2]
   # Specify kwarg for MCTS agent.search()
-  agentKwargs=[{'maxIteration':100, 'rewardIdx':[0]}, {}]
+  agentKwargs=[{}, {'maxIteration':25, 'rewardIdx':[1]}]
 
-  winStatistics = gamePlay( rounds=50, initialState=TTT, agentList = agents, 
-                            agentSigns = ["X", "O"], agentKwargList=agentKwargs, 
+  winStatistics = gamePlay( rounds=100, initialState=TTT, agentList = agents, 
+                            agentKwargList=agentKwargs, 
                             rewardSumFunc=sumTuple, printDetails=False)
   print(winStatistics)
 
