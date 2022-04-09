@@ -22,8 +22,9 @@ def main():
                             agentKwargList=agentKwargs, 
                             rewardSumFunc=sumTuple, printDetails=True)
   print(winStatistics)
-  # 891 Win (maxIter25 simPerIter100 - 11 mins), no Lose
-  # 848 Win using Scheduler (4 mins), no Lose
+  # Run 1000 rounds
+  # 891 Win, 0 Lose using (maxIter=25, simPerIter=100), took 11 mins
+  # 848 Win, 0 Lose using Schedule, took 4 mins
 
 if __name__ == "__main__":
     main()
