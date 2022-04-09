@@ -19,6 +19,15 @@ class MNKAction(Action):
   
   def __repr__(self):
     return str(self)
+  
+  def __eq__(self, other):
+    return self.__class__ == other.__class__ and self.playerSign==other.playerSign and self.m==other.m and self.n == other.n
+
+  def __lt__(self, other):
+    '''
+    Arbitary comparison using row index
+    '''
+    return self.m < other.m
 
 '''
 An MNK Game State.
@@ -152,6 +161,7 @@ class MNK(State):
       self.utility = tuple(utility)
     
     lastAction = self.lastAction
+    if not lastAction: return False  # No action taken yet
     lastPlayerSign = lastAction.playerSign
     ######## Check if there's a winner ########
     leftMost = max(0, lastAction.n-(self.k-1))
