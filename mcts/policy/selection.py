@@ -4,31 +4,31 @@ import math, random
 
 def UCB(node:Node, 
         explorationConstant:Union[float, int] = math.sqrt(2), 
-        rewardIdx:Optional[List[int]]=None,
+        utilityIdx:Optional[List[int]]=None,
         breakTies:Callable[[List[Action]],Action]=random.choice
         )->Node:
   '''
   Given a parent node, returns a child node according to UCB1 quantity.
-  rewardIdx: Applicable it the rewards are encoded with multiple elements, each representing different agents' reward
-            For example reward =(0,1,1). rewardIdx:=2 means that only reward[rewardIdx] is considered.
+  utilityIdx: Applicable it the utilities are encoded with multiple elements, each representing different agents' utility
+            For example utility =(0,1,1). utilityIdx:=2 means that only utility[utilityIdx] is considered.
   breakTies: Function used to choose an node from multiple equally good node.
   '''
-  bestUCB, bestActions = float("-inf"), []
+  bestUCB, bestChildNodes = float("-inf"), []
   epsilon = 0.00001
   
   # The sequence of action follows the expansion policy used
   for action, child in node.children.items():
-    if not child.rewards:
-        childRewards=0
+    if not child.utilities:
+        childUtilities=0
     else:
-      childRewards = sum([child.rewards[idx] for idx in rewardIdx]) if rewardIdx else sum(child.rewards)
+      childUtilities = sum([child.utilities[idx] for idx in utilityIdx]) if utilityIdx else sum(child.utilities)
     
-    childExpectedReward = childRewards / (child.numVisits+epsilon)
-    ucb = childExpectedReward + explorationConstant * math.sqrt(math.log(node.numVisits)/(child.numVisits+epsilon))
+    childExpectedUtility = childUtilities / (child.numVisits+epsilon)
+    ucb = childExpectedUtility + explorationConstant * math.sqrt(math.log(node.numVisits)/(child.numVisits+epsilon))
     if ucb>bestUCB:
-      bestActions = [child]
+      bestChildNodes = [child]
       bestUCB = ucb
     elif ucb==bestUCB:
-      bestActions.append(child)
+      bestChildNodes.append(child)
   
-  return breakTies(bestActions)
+  return breakTies(bestChildNodes)

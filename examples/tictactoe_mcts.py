@@ -16,11 +16,11 @@ def main():
   # Can use (lambda: constant) for constant `maxIteration` / `simPerIter`
   iterSchedule = Schedule(5,10, maxBound=25)
   simPerIterSchedule = Schedule(100, -30, minBound=1)
-  agentKwargs=[{}, {'maxIteration':iterSchedule, 'simPerIter':simPerIterSchedule, 'rewardIdx':[1]}]
+  agentKwargs=[{}, {'maxIteration':iterSchedule, 'simPerIter':simPerIterSchedule, 'utilityIdx':[1]}]
 
   winStatistics = gamePlay( rounds=1, initialState=TTT, agentList = agents, 
                             agentKwargList=agentKwargs, 
-                            rewardSumFunc=sumTuple, printDetails=True)
+                            utilitySumFunc=sumTuple, printDetails=True)
   print(winStatistics)
   # Run 1000 rounds
   # 891 Win, 0 Lose using (maxIter=25, simPerIter=100), took 11 mins

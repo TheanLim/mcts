@@ -7,7 +7,7 @@ def randomRollout(state:State)->Any:
   '''
   Starting from the provided state, randomly take actions
   until the terminal state. 
-  Returns the terminal state reward.
+  Returns the terminal state utility.
   '''
   # Deep copy to perform takeAction that doesnt preserve state
   # This is done to speed up rollout
@@ -15,4 +15,4 @@ def randomRollout(state:State)->Any:
   while not state.isTerminal():
     action = random.choice(state.getActions())
     state = state.takeAction(action, preserveState=False)
-  return state.getReward()
+  return state.getUtility()

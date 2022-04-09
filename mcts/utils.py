@@ -43,7 +43,7 @@ def gamePlay( rounds:int,
               initialState:State, 
               agentList:List[Search], 
               agentKwargList:Optional[List[Dict]]=None,
-              rewardSumFunc:Callable=sum,
+              utilitySumFunc:Callable=sum,
               printDetails:bool=False, 
               )->Any:
   '''
@@ -53,7 +53,7 @@ def gamePlay( rounds:int,
     initialState: the initial game state. Each round starts with the same initialState
     agentList: list of agents. The agent should have a `search(state)` method (inherits from the class `Search`.)
     agentKwargList: kwargs to be passed to `agent.search()`. Optional.
-    rewardSumFunc: function used to sum two rewards.
+    utilitySumFunc: function used to sum two utilities.
     printDetails: whether to print the `state` or not.
   '''
   maxIterPerRound = len(initialState.getActions())
@@ -65,7 +65,7 @@ def gamePlay( rounds:int,
     if len(agentList)!=len(agentKwargList):
       raise Exception("Agents and Kwarg Lists have different length.")
 
-  rewards = None
+  utilities = None
   initialKwargs = deepcopy(agentKwargList)
   for _ in tqdm(range(rounds)):
     state = initialState
@@ -82,10 +82,10 @@ def gamePlay( rounds:int,
         print("\n")
         print(state)
 
-      # Sum rewards
-      if state.getReward():
-        rewards = rewardSumFunc(rewards, state.getReward()) if rewards else state.getReward()
+      # Sum utilities
+      if state.getUtility():
+        utilities = utilitySumFunc(utilities, state.getUtility()) if utilities else state.getUtility()
       
       if(state.isTerminal()): 
         break
-  return rewards
+  return utilities

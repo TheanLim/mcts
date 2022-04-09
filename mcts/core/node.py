@@ -9,7 +9,7 @@ class Node:
     self.parent = parent
     self.children = {} # {action:Node(stateAfterAction, self)}
     self.numVisits = 0
-    self.rewards = None
+    self.utilities = None
   
   def isLeaf(self)->bool:
     # A terminal state is considered a leaf node
@@ -17,7 +17,7 @@ class Node:
   
   def __str__(self)->str:
     s=[]
-    s.append("rewards: "+str(self.rewards))
+    s.append("rewards: "+str(self.utilities))
     s.append("numVisits: "+str(self.numVisits))
     s.append("children/actions: " + str(list(self.children.keys())))
     return str(self.__class__.__name__)+": {"+", ".join(s)+"}"

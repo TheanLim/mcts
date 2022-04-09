@@ -15,19 +15,19 @@ class MCTS(Search):
                selectionPolicy:Callable, 
                expansionPolicy:Callable[[State], List[Action]], 
                rollOutPolicy:Callable[[State],Any],  
-               rewardSumFunc:Callable[[Any, Any], Any]=sum, 
+               utilitySumFunc:Callable[[Any, Any], Any]=sum, 
                explorationConstant:Union[float, int] = math.sqrt(2)
                ):
     '''
     selectionPolicy: Given the current node, which child node should be selected to traverse to?
     expansionPolicy: Given the current (leaf) node, which child node should be expanded (grown) first?
     rollOutPolicy: Given the current node/state, how should a playout be completed? What's the sequence of action to take?
-    rewardSumFunc: function used to sum two rewards. The default is sum()
+    utilitySumFunc: function used to sum two rewards. The default is sum()
     '''
     self.explorationConstant = explorationConstant
     self.selectionPolicy = selectionPolicy
     self.expansionPolicy = expansionPolicy # function that returns a seq of actions
-    self.rewardSumFunc = rewardSumFunc
+    self.utilitySumFunc = utilitySumFunc
     self.rollOutPolicy = rollOutPolicy
   
   def search(self, 
@@ -35,7 +35,7 @@ class MCTS(Search):
              maxIteration:Callable=(lambda: 1000),
              maxTimeSec:Callable=(lambda: 1000),
              simPerIter:Callable=(lambda:1),
-             rewardIdx:Optional[List[int]]=None,
+             utilityIdx:Optional[List[int]]=None,
              breakTies:Callable[[List[Action]],Action]=random.choice
              )->Action:
     '''
@@ -43,13 +43,13 @@ class MCTS(Search):
     The search is stopped when the maxIteration or maxTimeSec is hitted. 
     Args:
       simPerIter: number of simulation(rollouts) from the chosen node.
-      rewardIdx: Applicable it the rewards are encoded with multiple elements, each representing different agents' reward
-                  For example reward =(0,1,1). rewardIdx:=2 means that only reward[rewardIdx] is considered.
+      utilityIdx: Applicable if the utilities are encoded with multiple elements, each representing different agents' utility
+                  For example utility =(0,1,1). utilityIdx:=2 means that only utility[utilityIdx] is considered.
       breakTies: Function used to choose an node from multiple equally good node.
     '''
     self.root = Node(state, None)
     self.simPerIter = simPerIter()
-    self.rewardIdx = rewardIdx
+    self.utilityIdx = utilityIdx
     iterCnt = 0
     now = time.time()
     timePassed, timeMax = now, now+maxTimeSec()
@@ -61,21 +61,21 @@ class MCTS(Search):
       iterCnt+=1
       timePassed = time.time()
 
-    ########## Select the best action based on its expected rewards ##########
-    bestExpectedRewards, bestActions = float("-inf"), []
+    ########## Select the best action based on its expected utilities ##########
+    bestExpectedUtilities, bestActions = float("-inf"), []
     epsilon = 0.00001 # Prevent numeric overflow
     # The sequence of action follows the expansion policy used
     for action, child in self.root.children.items():
-      if not child.rewards:
-        childRewards=0
+      if not child.utilities:
+        childUtilities=0
       else:
-        childRewards = sum([child.rewards[idx] for idx in self.rewardIdx]) if rewardIdx else sum(child.rewards)
+        childUtilities = sum([child.utilities[idx] for idx in self.utilityIdx]) if utilityIdx else sum(child.utilities)
 
-      expectedRewards = childRewards/(child.numVisits+epsilon)
-      if expectedRewards>bestExpectedRewards:
+      expectedUtilities = childUtilities/(child.numVisits+epsilon)
+      if expectedUtilities>bestExpectedUtilities:
         bestActions = [action]
-        bestExpectedRewards = expectedRewards
-      elif expectedRewards==bestExpectedRewards:
+        bestExpectedUtilities = expectedUtilities
+      elif expectedUtilities==bestExpectedUtilities:
         bestActions.append(action)
     return breakTies(bestActions)
   
@@ -90,8 +90,8 @@ class MCTS(Search):
     if node.numVisits>0 and not node.state.isTerminal():
       node = self.expansion(node)
     for i in range(self.simPerIter):
-      reward = self.simulation(node)
-      self.backpropagation(node, reward, self.rewardSumFunc)
+      utility = self.simulation(node)
+      self.backpropagation(node, utility, self.utilitySumFunc)
   
   def selection(self)->Node:
     '''
@@ -101,7 +101,7 @@ class MCTS(Search):
     # Select a leaf node starting from the root node
     node = self.root
     while not node.isLeaf():
-      node = self.selectionPolicy(node, self.explorationConstant, self.rewardIdx)
+      node = self.selectionPolicy(node, self.explorationConstant, self.utilityIdx)
     return node
   
   def expansion(self, node:Node)->Node:
@@ -126,17 +126,17 @@ class MCTS(Search):
     '''
     return self.rollOutPolicy(node.state)
   
-  def backpropagation(self, node:Node, reward:Any, rewardSumFunc:Callable=sum)->None:
+  def backpropagation(self, node:Node, utility:Any, utilitySumFunc:Callable=sum)->None:
     '''
     BackPropagate results to parent nodes.
-    Update a node's Rewards and Number of being visited.
+    Update a node's Utility and Number of being visited.
 
-    rewardSumFunc: function used to sum two rewards. The default is sum()
+    utilitySumFunc: function used to sum two utilities. The default is sum()
     '''
     while node:
       node.numVisits+=1
-      if node.rewards:
-        node.rewards = rewardSumFunc(node.rewards,reward)
+      if node.utilities:
+        node.utilities = utilitySumFunc(node.utilities,utility)
       else:
-        node.rewards = reward
+        node.utilities = utility
       node = node.parent

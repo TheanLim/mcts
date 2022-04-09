@@ -14,5 +14,5 @@ class State:
     pass
   def isTerminal(self)->bool:
     pass
-  def getReward(self)->Any:
+  def getUtility(self)->Any:
     pass

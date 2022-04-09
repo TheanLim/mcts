@@ -51,8 +51,8 @@ class MNK(State):
     # Whether it is a terminal state. This is stored to prevent recomputation.
     self._isTerminal = False
     self.remainingMoves = m*n
-    # Store rewards in the form of tuple(rewardPlayer1, rewardPlayer2,...)
-    self.reward = tuple([0 for i in range(len(playerSigns))]) # draw by default
+    # Store utilities in the form of tuple(utilityPlayer1, utilityPlayer2,...)
+    self.utility = tuple([0 for i in range(len(playerSigns))]) # draw by default
     # Board of m*n filled with emptySign
     self.board = [[emptySign for j in range(n)] for i in range(m)]
   
@@ -137,19 +137,19 @@ class MNK(State):
     in a row, col, or diagonally.
     Updates self.reward, and self._isTerminal if needed.
     '''
-    def encodeReward()->None:
+    def encodeUtility()->None:
       '''
       Encodes reward properly
       (-1,-1,1,-1) means the third player wins and get reward of 1
       and the other lose (-1 reward)
       '''
-      reward = []
+      utility = []
       for sign in self.playerSigns:
         if sign == self.lastAction.playerSign:
-          reward.append(1)
+          utility.append(1)
         else:
-          reward.append(-1)
-      self.reward = tuple(reward)
+          utility.append(-1)
+      self.utility = tuple(utility)
     
     lastAction = self.lastAction
     lastPlayerSign = lastAction.playerSign
@@ -163,26 +163,20 @@ class MNK(State):
     l, r  = leftMost, rightMost
     runningK = 0
     while l<=r:
-      if self.board[lastAction.m][l]==lastPlayerSign:
-        runningK+=1
-      else:
-        runningK = 0
+      runningK+= 1 if self.board[lastAction.m][l]==lastPlayerSign else 0
       l+=1
       if runningK==self.k: 
-        encodeReward()
+        encodeUtility()
         self._isTerminal = True
         return True
     #### Check col ####
     top, bottom = topMost, bottomMost
     runningK = 0
     while top<=bottom:
-      if self.board[top][lastAction.n]==lastPlayerSign:
-        runningK+=1
-      else:
-        runningK = 0
+      runningK+= 1 if self.board[top][lastAction.n]==lastPlayerSign else 0
       top+=1
       if runningK==self.k: 
-        encodeReward() 
+        encodeUtility() 
         self._isTerminal = True
         return True
     #### Check Diag1 ####
@@ -191,14 +185,11 @@ class MNK(State):
     bottom, r = bottomMost, rightMost
     runningK = 0
     while top<=bottom and l<=r:
-      if self.board[top][l]==lastPlayerSign:
-        runningK+=1
-      else:
-        runningK = 0
+      runningK+= 1 if self.board[top][l]==lastPlayerSign else 0
       top+=1
       l+=1
       if runningK==self.k: 
-        encodeReward()
+        encodeUtility()
         self._isTerminal = True
         return True
     #### Check Diag2 ####
@@ -207,26 +198,22 @@ class MNK(State):
     bottom, l = bottomMost, leftMost
     runningK = 0
     while top<=bottom and l<=r:
-      if self.board[top][r]==lastPlayerSign:
-        runningK+=1
-      else:
-        runningK = 0
+      runningK+= 1 if self.board[top][r]==lastPlayerSign else 0
       top+=1
       r-=1
       if runningK==self.k: 
-        encodeReward()
+        encodeUtility()
         self._isTerminal = True
         return True
     return False
   
-  def getReward(self)->Tuple:
+  def getUtility(self)->Tuple:
     '''
-    Get the reward from this game state.
-    The defult reward is a tuple of zeroes
+    Get the utility from this game state.
     '''
     # Reward comes from winning.
     self.checkWinner()
-    return self.reward
+    return self.utility
 
   def __str__(self)->str:
     '''
