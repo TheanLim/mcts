@@ -12,30 +12,31 @@ Less promising nodes are visited from time to time.
 '''
 class MCTS(Search):
   def __init__(self, 
-               selectionPolicy:Callable, 
+               selectionPolicy:Callable[[Node],Node], 
                expansionPolicy:Callable[[State], List[Action]], 
                rollOutPolicy:Callable[[State],Any],  
                utilitySumFunc:Callable[[Any, Any], Any]=sum, 
-               explorationConstant:Union[float, int] = math.sqrt(2)
+               utilityIdx:Optional[List[int]]=None
                ):
     '''
     selectionPolicy: Given the current node, which child node should be selected to traverse to?
     expansionPolicy: Given the current (leaf) node, which child node should be expanded (grown) first?
     rollOutPolicy: Given the current node/state, how should a playout be completed? What's the sequence of action to take?
     utilitySumFunc: function used to sum two rewards. The default is sum()
+    utilityIdx: Applicable if the utilities are encoded with multiple elements, each representing different agents' utility
+                  For example utility =(0,1,1). utilityIdx:=2 means that only utility[utilityIdx] is considered.
     '''
-    self.explorationConstant = explorationConstant
     self.selectionPolicy = selectionPolicy
     self.expansionPolicy = expansionPolicy # function that returns a seq of actions
-    self.utilitySumFunc = utilitySumFunc
     self.rollOutPolicy = rollOutPolicy
+    self.utilitySumFunc = utilitySumFunc
+    self.utilityIdx = utilityIdx
   
   def search(self, 
              state:State, 
              maxIteration:Callable=(lambda: 1000),
              maxTimeSec:Callable=(lambda: 1000),
              simPerIter:Callable=(lambda:1),
-             utilityIdx:Optional[List[int]]=None,
              breakTies:Callable[[List[Action]],Action]=random.choice
              )->Action:
     '''
@@ -43,18 +44,14 @@ class MCTS(Search):
     The search is stopped when the maxIteration or maxTimeSec is hitted. 
     Args:
       simPerIter: number of simulation(rollouts) from the chosen node.
-      utilityIdx: Applicable if the utilities are encoded with multiple elements, each representing different agents' utility
-                  For example utility =(0,1,1). utilityIdx:=2 means that only utility[utilityIdx] is considered.
       breakTies: Function used to choose an node from multiple equally good node.
     '''
     self.root = Node(state, None)
     self.simPerIter = simPerIter()
-    self.utilityIdx = utilityIdx
     iterCnt = 0
     now = time.time()
     timePassed, timeMax = now, now+maxTimeSec()
     maxIter = maxIteration()
-    #print(maxIter, self.simPerIter)
     # Loop while have remaining iterations or time
     while iterCnt<maxIter and timePassed<timeMax:
       self.oneIteration()
@@ -69,7 +66,7 @@ class MCTS(Search):
       if not child.utilities:
         childUtilities=0
       else:
-        childUtilities = sum([child.utilities[idx] for idx in self.utilityIdx]) if utilityIdx else sum(child.utilities)
+        childUtilities = sum([child.utilities[idx] for idx in self.utilityIdx]) if self.utilityIdx else sum(child.utilities)
 
       expectedUtilities = childUtilities/(child.numVisits+epsilon)
       if expectedUtilities>bestExpectedUtilities:
@@ -101,7 +98,7 @@ class MCTS(Search):
     # Select a leaf node starting from the root node
     node = self.root
     while not node.isLeaf():
-      node = self.selectionPolicy(node, self.explorationConstant, self.utilityIdx)
+      node = self.selectionPolicy(node)
     return node
   
   def expansion(self, node:Node)->Node:
