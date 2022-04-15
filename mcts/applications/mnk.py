@@ -28,6 +28,9 @@ class MNKAction(Action):
     Arbitary comparison using row index
     '''
     return self.m < other.m
+  
+  def __hash__(self) -> int:
+      return hash((self.playerSign, self.m, self.n))
 
 '''
 An MNK Game State.
