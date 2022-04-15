@@ -39,6 +39,10 @@ def sumTuple(a:Tuple, b:Tuple)->Tuple:
   '''
   return tuple(map(sum,zip(a,b)))
 
+def transpose2DList(lst:List):
+  transposedList = [list(element) for element in list(zip(*lst))]
+  return transposedList
+
 def gamePlay( rounds:int, 
               initialState:State, 
               agentList:List[Search], 
