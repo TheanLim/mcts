@@ -173,7 +173,7 @@ class MNK(State):
     l, r  = leftMost, rightMost
     runningK = 0
     while l<=r:
-      runningK+= 1 if self.board[lastAction.m][l]==lastPlayerSign else 0
+      runningK=runningK+1 if self.board[lastAction.m][l]==lastPlayerSign else 0
       l+=1
       if runningK==self.k: 
         encodeUtility()
@@ -183,7 +183,7 @@ class MNK(State):
     top, bottom = topMost, bottomMost
     runningK = 0
     while top<=bottom:
-      runningK+= 1 if self.board[top][lastAction.n]==lastPlayerSign else 0
+      runningK=runningK+1 if self.board[top][lastAction.n]==lastPlayerSign else 0
       top+=1
       if runningK==self.k: 
         encodeUtility() 
@@ -195,7 +195,7 @@ class MNK(State):
     bottom, r = bottomMost, rightMost
     runningK = 0
     while top<=bottom and l<=r:
-      runningK+= 1 if self.board[top][l]==lastPlayerSign else 0
+      runningK=runningK+1 if self.board[top][l]==lastPlayerSign else 0
       top+=1
       l+=1
       if runningK==self.k: 
@@ -208,7 +208,7 @@ class MNK(State):
     bottom, l = bottomMost, leftMost
     runningK = 0
     while top<=bottom and l<=r:
-      runningK+= 1 if self.board[top][r]==lastPlayerSign else 0
+      runningK=runningK+1 if self.board[top][r]==lastPlayerSign else 0
       top+=1
       r-=1
       if runningK==self.k: 
