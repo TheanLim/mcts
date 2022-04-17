@@ -94,6 +94,16 @@ class MNK(State):
     curPlayer = self.getCurrentPlayerSign()
     return [MNKAction(curPlayer, i, j) for i in range(self.m) for j in range(self.n) if self.board[i][j] == self.emptySign]
 
+  def isLegalAction(self, action:MNKAction)->bool:
+    if (
+        action.m<0 or action.m>=self.m or
+        action.n<0 or action.n>=self.n or
+        action.playerSign!=self.getCurrentPlayerSign() or
+        self.board[action.m][action.n] != self.emptySign
+        ):
+      return False
+    return True
+
   def takeAction(self, action:MNKAction, preserveState:bool=True)->'State':
     '''
     Take an action and returns the resulting state.
@@ -107,13 +117,8 @@ class MNK(State):
     '''
     if self.isTerminal():
       raise Exception("Cannot take actions in a terminal state.")
-    if (
-        action.m<0 or action.m>=self.m or
-        action.n<0 or action.n>=self.n or
-        action.playerSign!=self.getCurrentPlayerSign() or
-        self.board[action.m][action.n] != self.emptySign
-        ):
-      raise Exception("Illegal Action.")
+    if not self.isLegalAction(action):
+      raise Exception("Illegal Action.", action)
     stateCopy = deepcopy(self) if preserveState else self
     stateCopy.board[action.m][action.n] = action.playerSign
     ## Rotate the Players Sign
