@@ -1,7 +1,5 @@
 from mcts.core import Search, Node, State, Action
-from typing import Union, Callable, Optional, Any, List
-import math
-from copy import deepcopy
+from typing import Callable, Optional, Any, List
 import time
 import random
 
