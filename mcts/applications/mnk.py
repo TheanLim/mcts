@@ -1,7 +1,7 @@
 from mcts.core import State, Action
 
 from typing import List, Any, Tuple, Any
-from copy import deepcopy
+import pickle
 
 '''
 An MNK Action.
@@ -72,7 +72,7 @@ class MNK(State):
     '''
     Returns a deep-copied board to prevent accidental modification
     '''
-    return deepcopy(self.board)
+    return pickle.loads(pickle.dumps(self.board))
 
   def getPlayersSigns(self)->List[Any]: 
     '''
@@ -119,7 +119,7 @@ class MNK(State):
       raise Exception("Cannot take actions in a terminal state.")
     if not self.isLegalAction(action):
       raise Exception("Illegal Action.", action)
-    stateCopy = deepcopy(self) if preserveState else self
+    stateCopy = pickle.loads(pickle.dumps(self)) if preserveState else self
     stateCopy.board[action.m][action.n] = action.playerSign
     ## Rotate the Players Sign
     stateCopy.playerSignsRotation.pop(0)
@@ -239,3 +239,9 @@ class MNK(State):
     row is separated (newline) from each other
     '''
     return '\n'.join(map(lambda x: ' '.join(map(str, x)), self.board))
+  
+  def __hash__(self) -> int:
+    return hash(tuple(tuple(row) for row in self.board))
+  
+  def __eq__(self, other: object) -> bool:
+    return self.__class__ == other.__class__ and self.board == other.board
