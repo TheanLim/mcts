@@ -3,6 +3,8 @@ from mcts.core import State, Action
 from typing import List, Any, Tuple, Any
 import pickle
 
+from mcts.core.search import Search
+
 '''
 An MNK Action.
 An action is characterize by placing a player's sign (such as "X")
@@ -31,6 +33,23 @@ class MNKAction(Action):
   
   def __hash__(self) -> int:
       return hash((self.playerSign, self.m, self.n))
+
+'''
+A Human Player Agent for the MNK Game
+'''
+class MNKCommandInput(Search):
+  def search(self, state: 'MNK')->Action:
+    print("Input m and n to place your sign: ", state.getCurrentPlayerSign())
+    while True:
+      print("Please input `m` and press Enter.")
+      m = int(input())
+      print("Please input `n` and press Enter.")
+      n = int(input())
+      action = MNKAction(state.getCurrentPlayerSign(), m, n)
+      if state.isLegalAction(action): 
+        return action
+      else:
+        print("This is an illegal action. Please try again.")
 
 '''
 An MNK Game State.
@@ -68,7 +87,7 @@ class MNK(State):
     # Board of m*n filled with emptySign
     self.board = [[emptySign for j in range(n)] for i in range(m)]
   
-  def getBoard(self)->None: 
+  def getBoard(self)->'MNK': 
     '''
     Returns a deep-copied board to prevent accidental modification
     '''
