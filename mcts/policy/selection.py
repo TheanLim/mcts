@@ -22,7 +22,7 @@ class UCB(Selection):
     self.explorationConstant = explorationConstant
     self.breakTies =breakTies
   
-  def __call__(self, node:Node)->Node:
+  def __call__(self, node:Node, depth:int)->Node:
     bestUCB, bestChildNodes = float("-inf"), []
     epsilon = 0.00001
     
@@ -31,7 +31,15 @@ class UCB(Selection):
       if not child.utilities:
           childUtilities=0
       else:
-        childUtilities = sum([child.utilities[idx] for idx in self.utilityIdx]) if self.utilityIdx else sum(child.utilities)
+        # Shift the utilityIdx correctly so that each player is maximizing it's gain
+        numPlayers = len(child.utilities)
+        # No shifts if depth 0, numPlayers, 2*numPlayers
+        shift = depth%numPlayers
+        if self.utilityIdx:
+          shiftedUtilityIdx = [(idx + shift)%numPlayers for idx in self.utilityIdx]
+          childUtilities = sum([child.utilities[idx] for idx in shiftedUtilityIdx])
+        else:
+          childUtilities = sum(child.utilities)
       
       childExpectedUtility = childUtilities / (child.numVisits+epsilon)
       ucb = childExpectedUtility + self.explorationConstant * math.sqrt(math.log(node.numVisits)/(child.numVisits+epsilon))
@@ -40,5 +48,4 @@ class UCB(Selection):
         bestUCB = ucb
       elif ucb==bestUCB:
         bestChildNodes.append(child)
-    
     return self.breakTies(bestChildNodes)

@@ -95,8 +95,10 @@ class MCTS(Search):
     '''
     # Select a leaf node starting from the root node
     node = self.root
+    depth = 0
     while not node.isLeaf():
-      node = self.selectionPolicy(node)
+      node = self.selectionPolicy(node, depth)
+      depth+=1
     return node
   
   def expansion(self, node:Node)->Node:
